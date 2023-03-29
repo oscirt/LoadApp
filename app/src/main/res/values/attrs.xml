@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="DownloadButton">
+        <attr name="android:textColor"/>
+        <attr name="android:background"/>
+        <attr name="loadLineColor" format="color"/>
+        <attr name="circleColor" format="color"/>
+    </declare-styleable>
+</resources>
