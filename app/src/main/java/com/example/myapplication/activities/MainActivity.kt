@@ -1,39 +1,41 @@
-package com.example.myapplication.fragments
+package com.example.myapplication.activities
 
+import android.Manifest
 import android.app.NotificationChannel
 import android.app.NotificationManager
+import android.content.pm.PackageManager
 import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import android.util.Log
 import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.activity.viewModels
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.databinding.DataBindingUtil
-import androidx.fragment.app.Fragment
-import androidx.fragment.app.viewModels
 import com.example.myapplication.R
-import com.example.myapplication.databinding.FragmentBaseBinding
+import com.example.myapplication.databinding.ActivityBaseBinding
 import com.example.myapplication.viewModels.Source
 import com.example.myapplication.viewModels.StatusViewModel
 
-class BaseFragment : Fragment() {
+class MainActivity : AppCompatActivity() {
 
-    private lateinit var binding: FragmentBaseBinding
-    private val viewModel: StatusViewModel by viewModels()
+    private companion object {
+        private const val TAG = "MainActivity"
+    }
+
     private lateinit var notificationManager: NotificationManager
+    private lateinit var binding: ActivityBaseBinding
 
-    override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View {
-        binding = DataBindingUtil.inflate(
-            inflater,
-            R.layout.fragment_base,
-            container,
-            false
+    private val viewModel: StatusViewModel by viewModels()
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        binding = DataBindingUtil.setContentView(
+            this,
+            R.layout.activity_base
         )
 
         binding.viewModel = viewModel
@@ -48,7 +50,7 @@ class BaseFragment : Fragment() {
         }
 
         notificationManager = ContextCompat.getSystemService(
-            requireContext(), NotificationManager::class.java) as NotificationManager
+            this, NotificationManager::class.java) as NotificationManager
 
         createNotificationChannel(
             getString(R.string.download_notification_channel_id),
@@ -58,11 +60,11 @@ class BaseFragment : Fragment() {
         binding.downloadButton.setOnClickListener {
             if (binding.radioGroupDownloadSource.checkedRadioButtonId != -1) {
                 viewModel.download(
-                    requireContext(),
+                    this,
                     notificationManager
                 )
             } else {
-                Toast(requireContext()).apply {
+                Toast(this).apply {
                     duration = Toast.LENGTH_SHORT
                     setText("Please select the file to download")
                     show()
@@ -70,7 +72,28 @@ class BaseFragment : Fragment() {
             }
         }
 
-        return binding.root
+        val requestPermissionLauncher =
+            registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
+                if (!isGranted) {
+                    Toast.makeText(
+                        this,
+                        "Download notifications will not come",
+                        Toast.LENGTH_LONG
+                    ).show()
+                }
+            }
+
+        if (Build.VERSION.SDK_INT > 32) {
+            if (ContextCompat.checkSelfPermission(
+                    this,
+                    Manifest.permission.POST_NOTIFICATIONS
+                ) == PackageManager.PERMISSION_GRANTED) {
+                    Log.d(TAG, "onCreate: permission already was granted")
+                }
+            else {
+                requestPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+            }
+        }
     }
 
     private fun createNotificationChannel(

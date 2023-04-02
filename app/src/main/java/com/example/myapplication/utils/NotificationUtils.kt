@@ -1,10 +1,12 @@
 package com.example.myapplication.utils
 
 import android.app.NotificationManager
+import android.app.PendingIntent
 import android.content.Context
+import android.content.Intent
 import android.os.Bundle
 import androidx.core.app.NotificationCompat
-import androidx.navigation.NavDeepLinkBuilder
+import com.example.myapplication.activities.DownloadStatusActivity
 import com.example.myapplication.R
 
 private const val NOTIFICATION_ID = 0
@@ -14,10 +16,17 @@ fun NotificationManager.createNotification(
     applicationContext: Context,
     args: Bundle
 ) {
-    val contentPendingIntent = NavDeepLinkBuilder(applicationContext)
-        .setGraph(R.navigation.nav_graph)
-        .addDestination(R.id.downloadStatusFragment, args)
-        .createPendingIntent()
+    val contentIntent = Intent(applicationContext, DownloadStatusActivity::class.java).apply {
+        flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+        putExtras(args)
+    }
+
+    val contentPendingIntent = PendingIntent.getActivity(
+        applicationContext,
+        NOTIFICATION_ID,
+        contentIntent,
+        PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+    )
 
     val builder = NotificationCompat.Builder(
         applicationContext,

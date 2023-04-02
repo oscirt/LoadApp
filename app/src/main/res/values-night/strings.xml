@@ -12,4 +12,5 @@
     <string name="text_view_file_status">Status:</string>
     <string name="status">Check the status</string>
     <string name="content_description_download_button">download</string>
+    <string name="label_activity_download_status">Download status</string>
 </resources>
