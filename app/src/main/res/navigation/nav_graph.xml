@@ -12,12 +12,26 @@
         tools:layout="@layout/fragment_base">
         <action
             android:id="@+id/action_baseFragment_to_downloadStatusFragment"
-            app:destination="@id/downloadStatusFragment" />
+            app:destination="@id/downloadStatusFragment"
+            app:popUpTo="@id/nav_graph"
+            app:popUpToInclusive="true" />
     </fragment>
     <fragment
         android:id="@+id/downloadStatusFragment"
         android:name="com.example.myapplication.fragments.DownloadStatusFragment"
         android:label="DownloadStatusFragment"
-        tools:layout="@layout/fragment_download_status"/>
+        tools:layout="@layout/fragment_download_status">
+        <argument
+            android:name="source"
+            app:argType="integer" />
+        <argument
+            android:name="code"
+            app:argType="integer" />
+        <action
+            android:id="@+id/action_downloadStatusFragment_to_baseFragment"
+            app:destination="@id/baseFragment"
+            app:popUpTo="@id/nav_graph"
+            app:popUpToInclusive="true" />
+    </fragment>
 
 </navigation>
