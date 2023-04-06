@@ -2,9 +2,7 @@ package com.example.myapplication.viewModels
 
 import android.app.NotificationManager
 import android.content.Context
-import android.os.Bundle
 import android.util.Log
-import androidx.core.os.bundleOf
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -34,7 +32,6 @@ class StatusViewModel : ViewModel() {
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
                 _status.postValue(0.6f)
-                val bundle = Bundle()
                 try {
                     val body = when (chosenSource) {
                         Source.GLIDE -> DownloadProjectsReadme.service.getGlideReadme()
@@ -44,24 +41,18 @@ class StatusViewModel : ViewModel() {
                     }
                     _status.postValue(1f)
                     code = body.code()
-                    bundle.putBundle("DOWNLOAD_STATUS", bundleOf(
-                        Pair("source", chosenSource!!.ordinal),
-                        Pair("code", code)
-                    ))
                     notificationManager.createNotification(
                         "File ${chosenSource.toString()} downloaded",
                         context,
-                        bundle
+                        chosenSource!!.ordinal,
+                        code
                     )
                 } catch (e: Exception) {
-                    bundle.putBundle("DOWNLOAD_STATUS", bundleOf(
-                        Pair("source", chosenSource!!.ordinal),
-                        Pair("code", 404)
-                    ))
                     notificationManager.createNotification(
                         "File ${chosenSource.toString()} is not downloaded",
                         context,
-                        bundle
+                        chosenSource!!.ordinal,
+                        404
                     )
                     Log.w(TAG, "download: ${e.javaClass}: ${e.message}")
                     _status.postValue(0f)

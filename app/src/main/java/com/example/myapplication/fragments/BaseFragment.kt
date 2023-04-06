@@ -13,6 +13,7 @@ import androidx.core.content.ContextCompat
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.navigation.fragment.findNavController
 import com.example.myapplication.R
 import com.example.myapplication.databinding.FragmentBaseBinding
 import com.example.myapplication.viewModels.Source
@@ -28,49 +29,58 @@ class BaseFragment : Fragment() {
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View {
-        binding = DataBindingUtil.inflate(
-            inflater,
-            R.layout.fragment_base,
-            container,
-            false
-        )
-
-        binding.viewModel = viewModel
-
-        binding.radioGroupDownloadSource.setOnCheckedChangeListener { _, checkedId ->
-            viewModel.chosenSource = when (checkedId) {
-                R.id.radio_button_glide_source -> Source.GLIDE
-                R.id.radio_button_loadApp_source -> Source.UDACITY
-                R.id.radio_button_retrofit_source -> Source.RETROFIT
-                else -> null
-            }
-        }
-
-        notificationManager = ContextCompat.getSystemService(
-            requireContext(), NotificationManager::class.java) as NotificationManager
-
-        createNotificationChannel(
-            getString(R.string.download_notification_channel_id),
-            getString(R.string.download_notification_channel_name)
-        )
-
-        binding.downloadButton.setOnClickListener {
-            if (binding.radioGroupDownloadSource.checkedRadioButtonId != -1) {
-                viewModel.download(
-                    requireContext(),
-                    notificationManager
+    ): View? {
+        requireActivity().intent.extras?.let {
+            findNavController().navigate(
+                BaseFragmentDirections.actionBaseFragmentToDownloadStatusFragment(
+                    it.getInt("source"),
+                    it.getInt("code")
                 )
-            } else {
-                Toast(requireContext()).apply {
-                    duration = Toast.LENGTH_SHORT
-                    setText("Please select the file to download")
-                    show()
+            )
+            return null
+        } ?: run {
+            binding = DataBindingUtil.inflate(
+                inflater,
+                R.layout.fragment_base,
+                container,
+                false
+            )
+
+            binding.viewModel = viewModel
+
+            binding.radioGroupDownloadSource.setOnCheckedChangeListener { _, checkedId ->
+                viewModel.chosenSource = when (checkedId) {
+                    R.id.radio_button_glide_source -> Source.GLIDE
+                    R.id.radio_button_loadApp_source -> Source.UDACITY
+                    R.id.radio_button_retrofit_source -> Source.RETROFIT
+                    else -> null
                 }
             }
-        }
 
-        return binding.root
+            notificationManager = ContextCompat.getSystemService(
+                requireContext(), NotificationManager::class.java) as NotificationManager
+
+            createNotificationChannel(
+                getString(R.string.download_notification_channel_id),
+                getString(R.string.download_notification_channel_name)
+            )
+
+            binding.downloadButton.setOnClickListener {
+                if (binding.radioGroupDownloadSource.checkedRadioButtonId != -1) {
+                    viewModel.download(
+                        requireContext(),
+                        notificationManager
+                    )
+                } else {
+                    Toast(requireContext()).apply {
+                        duration = Toast.LENGTH_SHORT
+                        setText("Please select the file to download")
+                        show()
+                    }
+                }
+            }
+            return binding.root
+        }
     }
 
     private fun createNotificationChannel(

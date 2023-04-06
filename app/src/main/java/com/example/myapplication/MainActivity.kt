@@ -13,7 +13,6 @@ import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.NavigationUI
-import com.example.myapplication.fragments.BaseFragmentDirections
 
 class MainActivity : AppCompatActivity() {
 
@@ -31,17 +30,6 @@ class MainActivity : AppCompatActivity() {
         navController = navHost.navController
         val appBarConfiguration = AppBarConfiguration(setOf(R.id.baseFragment, R.id.downloadStatusFragment))
         NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration)
-
-        val type = intent.getStringExtra("TYPE")
-        if (type != null && type == "download_notification") {
-            val bundle = intent.getBundleExtra("DOWNLOAD_STATUS")!!
-            navController.navigate(
-                BaseFragmentDirections.actionBaseFragmentToDownloadStatusFragment(
-                    bundle.getInt("source"),
-                    bundle.getInt("code")
-                )
-            )
-        }
 
         val requestPermissionLauncher =
             registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->

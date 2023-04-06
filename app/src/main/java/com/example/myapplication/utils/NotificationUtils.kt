@@ -4,7 +4,6 @@ import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
-import android.os.Bundle
 import androidx.core.app.NotificationCompat
 import com.example.myapplication.MainActivity
 import com.example.myapplication.R
@@ -14,17 +13,20 @@ private const val NOTIFICATION_ID = 0
 fun NotificationManager.createNotification(
     message: String,
     applicationContext: Context,
-    args: Bundle
+    source: Int,
+    code: Int,
 ) {
     val contentIntent = Intent(applicationContext, MainActivity::class.java)
-    contentIntent.putExtras(args)
-    contentIntent.putExtra("TYPE", "download_notification")
+    contentIntent.putExtra("source", source)
+        .putExtra("code", code)
+        .putExtra("TYPE", "download_notification")
+        .flags = Intent.FLAG_ACTIVITY_PREVIOUS_IS_TOP
 
     val contentPendingIntent = PendingIntent.getActivity(
         applicationContext,
         NOTIFICATION_ID,
         contentIntent,
-        PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        PendingIntent.FLAG_ONE_SHOT or PendingIntent.FLAG_IMMUTABLE
     )
 
     val builder = NotificationCompat.Builder(
